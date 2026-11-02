@@ -1,0 +1,733 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="description"
+          content="A cloud deployment project demonstrating Amazon S3, CloudFront, HTTPS delivery, and cloud infrastructure concepts.">
+
+    <meta name="theme-color" content="#080d19">
+
+    <title>CloudLaunch | AWS Deployment Project</title>
+
+    <style>
+        :root {
+            --bg: #080d19;
+            --surface: #101a2c;
+            --surface-light: #152239;
+            --text: #f1f5f9;
+            --muted: #9baac0;
+            --accent: #ffb547;
+            --blue: #69a7ff;
+            --green: #49dfa0;
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: Inter, "Segoe UI", Arial, sans-serif;
+            background:
+                radial-gradient(
+                    circle at 80% 10%,
+                    rgba(55, 104, 180, 0.16),
+                    transparent 32%
+                ),
+                var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .container {
+            width: min(1120px, 90%);
+            margin: auto;
+        }
+
+        /* Navigation */
+
+        header {
+            border-bottom: 1px solid var(--border);
+            background: rgba(8, 13, 25, 0.88);
+        }
+
+        nav {
+            min-height: 76px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .logo {
+            font-size: 1.3rem;
+            font-weight: 800;
+            letter-spacing: -0.7px;
+        }
+
+        .logo span {
+            color: var(--accent);
+        }
+
+        .nav-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 24px;
+            font-size: 0.9rem;
+            color: var(--muted);
+        }
+
+        .nav-links a:hover {
+            color: var(--accent);
+        }
+
+        /* Hero */
+
+        .hero {
+            min-height: 590px;
+            display: grid;
+            grid-template-columns: 1.15fr 0.85fr;
+            align-items: center;
+            gap: 50px;
+            padding: 80px 0;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 9px;
+            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.035);
+            color: var(--green);
+            padding: 8px 13px;
+            border-radius: 50px;
+            font-size: 0.82rem;
+            margin-bottom: 25px;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--green);
+            box-shadow: 0 0 12px rgba(73, 223, 160, 0.6);
+        }
+
+        h1 {
+            font-size: clamp(2.8rem, 6vw, 4.7rem);
+            line-height: 1.08;
+            letter-spacing: -2.5px;
+            margin-bottom: 25px;
+        }
+
+        .gradient {
+            background: linear-gradient(100deg, var(--accent), #ffdd91);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .hero-description {
+            color: var(--muted);
+            max-width: 590px;
+            font-size: 1.05rem;
+            margin-bottom: 30px;
+        }
+
+        .buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 13px;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 12px 19px;
+            border-radius: 9px;
+            font-weight: 700;
+            font-size: 0.92rem;
+            transition: transform 0.2s, background 0.2s;
+        }
+
+        .button:hover {
+            transform: translateY(-2px);
+        }
+
+        .button-primary {
+            background: var(--accent);
+            color: #17120a;
+        }
+
+        .button-secondary {
+            border: 1px solid var(--border);
+            background: var(--surface);
+        }
+
+        /* Architecture illustration */
+
+        .architecture {
+            border: 1px solid var(--border);
+            border-radius: 22px;
+            padding: 27px;
+            background: linear-gradient(
+                145deg,
+                rgba(21, 34, 57, 0.95),
+                rgba(12, 19, 34, 0.95)
+            );
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.25);
+        }
+
+        .architecture h2 {
+            font-size: 1.05rem;
+            margin-bottom: 5px;
+        }
+
+        .architecture > p {
+            font-size: 0.82rem;
+            color: var(--muted);
+            margin-bottom: 24px;
+        }
+
+        .arch-node {
+            padding: 15px;
+            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.035);
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .arch-node strong {
+            display: block;
+            font-size: 0.95rem;
+        }
+
+        .arch-node span {
+            color: var(--muted);
+            font-size: 0.78rem;
+        }
+
+        .arch-icon {
+            font-size: 1.4rem;
+            margin-bottom: 4px;
+        }
+
+        .arrow {
+            text-align: center;
+            color: var(--accent);
+            font-size: 1.35rem;
+            height: 34px;
+        }
+
+        .s3-node {
+            border-color: rgba(255, 181, 71, 0.35);
+        }
+
+        .cloudfront-node {
+            border-color: rgba(105, 167, 255, 0.4);
+        }
+
+        .arch-caption {
+            text-align: center;
+            color: var(--muted);
+            font-size: 0.76rem;
+            margin-top: 17px;
+        }
+
+        /* Shared sections */
+
+        section {
+            padding: 75px 0;
+        }
+
+        .section-heading {
+            max-width: 650px;
+            margin-bottom: 35px;
+        }
+
+        .section-label {
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 700;
+            font-size: 0.76rem;
+            margin-bottom: 10px;
+        }
+
+        h2.section-title {
+            font-size: clamp(2rem, 4vw, 2.8rem);
+            letter-spacing: -1px;
+            line-height: 1.2;
+            margin-bottom: 15px;
+        }
+
+        .section-description {
+            color: var(--muted);
+        }
+
+        /* Service cards */
+
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        .service-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 25px;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .service-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(255, 181, 71, 0.45);
+        }
+
+        .service-icon {
+            width: 48px;
+            height: 48px;
+            display: grid;
+            place-items: center;
+            background: var(--surface-light);
+            border-radius: 12px;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+        }
+
+        .service-card h3 {
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+        }
+
+        .service-card p {
+            font-size: 0.9rem;
+            color: var(--muted);
+        }
+
+        .service-tag {
+            display: inline-block;
+            color: var(--blue);
+            font-size: 0.77rem;
+            margin-top: 17px;
+            font-weight: 700;
+        }
+
+        /* Deployment process */
+
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 17px;
+        }
+
+        .step {
+            border-top: 2px solid var(--accent);
+            padding: 21px 17px;
+            background: rgba(255, 255, 255, 0.025);
+            border-radius: 0 0 12px 12px;
+        }
+
+        .step-number {
+            font-size: 0.78rem;
+            color: var(--accent);
+            font-weight: 800;
+        }
+
+        .step h3 {
+            font-size: 1rem;
+            margin: 10px 0;
+        }
+
+        .step p {
+            color: var(--muted);
+            font-size: 0.85rem;
+        }
+
+        /* Security section */
+
+        .security-box {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            align-items: start;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            border-radius: 18px;
+            padding: 32px;
+        }
+
+        .security-box h3 {
+            margin-bottom: 12px;
+        }
+
+        .security-box p,
+        .security-box li {
+            color: var(--muted);
+            font-size: 0.91rem;
+        }
+
+        .security-box ul {
+            padding-left: 20px;
+        }
+
+        .security-box li {
+            margin-bottom: 9px;
+        }
+
+        .note {
+            margin-top: 20px;
+            border-left: 3px solid var(--accent);
+            padding: 13px 15px;
+            background: rgba(255, 181, 71, 0.06);
+            color: var(--muted);
+            font-size: 0.85rem;
+        }
+
+        /* Footer */
+
+        footer {
+            border-top: 1px solid var(--border);
+            padding: 28px 0;
+            color: var(--muted);
+            font-size: 0.83rem;
+        }
+
+        .footer-inner {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .footer-inner strong {
+            color: var(--text);
+        }
+
+        /* Responsive layout */
+
+        @media (max-width: 850px) {
+            .hero {
+                grid-template-columns: 1fr;
+                gap: 35px;
+            }
+
+            .architecture {
+                max-width: 600px;
+            }
+
+            .services-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .steps {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 560px) {
+            nav {
+                align-items: flex-start;
+                flex-direction: column;
+                padding: 18px 0;
+            }
+
+            .nav-links {
+                gap: 15px;
+            }
+
+            .hero {
+                padding: 55px 0;
+            }
+
+            h1 {
+                letter-spacing: -1.5px;
+            }
+
+            section {
+                padding: 55px 0;
+            }
+
+            .services-grid,
+            .steps,
+            .security-box {
+                grid-template-columns: 1fr;
+            }
+
+            .architecture {
+                padding: 18px;
+            }
+
+            .security-box {
+                padding: 22px;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            html {
+                scroll-behavior: auto;
+            }
+
+            *,
+            *::before,
+            *::after {
+                transition: none !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <div class="container">
+            <nav aria-label="Main navigation">
+                <a class="logo" href="#home">Cloud<span>Launch</span></a>
+
+                <div class="nav-links">
+                    <a href="#architecture">Architecture</a>
+                    <a href="#services">Services</a>
+                    <a href="#deployment">Deployment</a>
+                    <a href="#security">Security</a>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section class="container hero" id="home">
+
+            <div>
+                <div class="eyebrow">
+                    <span class="dot"></span>
+                    CLOUD COMPUTING PROJECT
+                </div>
+
+                <h1>
+                    My First<br>
+                    <span class="gradient">Cloud Deployment.</span>
+                </h1>
+
+                <p class="hero-description">
+                    A hands-on cloud computing project exploring static
+                    website hosting, content delivery, HTTPS, and access
+                    control using Amazon Web Services.
+                </p>
+
+                <div class="buttons">
+                    <a class="button button-primary"
+                       href="#architecture">
+                        Explore Architecture &darr;
+                    </a>
+
+                    <a class="button button-secondary"
+                       href="#deployment">
+                        Deployment Steps
+                    </a>
+                </div>
+            </div>
+
+            <div class="architecture" id="architecture">
+                <h2>Deployment Architecture</h2>
+                <p>Illustrative flow of a private S3 website origin.</p>
+
+                <div class="arch-node">
+                    <div class="arch-icon">🌐</div>
+                    <strong>Website Visitor</strong>
+                    <span>HTTPS request</span>
+                </div>
+
+                <div class="arrow" aria-hidden="true">&darr;</div>
+
+                <div class="arch-node cloudfront-node">
+                    <div class="arch-icon">⚡</div>
+                    <strong>Amazon CloudFront</strong>
+                    <span>Content delivery network</span>
+                </div>
+
+                <div class="arrow" aria-hidden="true">&darr;</div>
+
+                <div class="arch-node s3-node">
+                    <div class="arch-icon">🗄️</div>
+                    <strong>Amazon S3</strong>
+                    <span>Private static file storage</span>
+                </div>
+
+                <p class="arch-caption">
+                    CloudFront uses Origin Access Control to access S3.
+                </p>
+            </div>
+
+        </section>
+
+        <section id="services">
+            <div class="container">
+
+                <div class="section-heading">
+                    <p class="section-label">Cloud Infrastructure</p>
+                    <h2 class="section-title">Services behind the website.</h2>
+                    <p class="section-description">
+                        Understanding how cloud services work together
+                        is a key part of building reliable infrastructure.
+                    </p>
+                </div>
+
+                <div class="services-grid">
+
+                    <article class="service-card">
+                        <div class="service-icon">🗄️</div>
+                        <h3>Amazon S3</h3>
+                        <p>
+                            Object storage for website files, images,
+                            stylesheets, and other static assets.
+                        </p>
+                        <span class="service-tag">STORAGE</span>
+                    </article>
+
+                    <article class="service-card">
+                        <div class="service-icon">⚡</div>
+                        <h3>Amazon CloudFront</h3>
+                        <p>
+                            A CDN that caches and delivers website
+                            content through edge locations.
+                        </p>
+                        <span class="service-tag">CONTENT DELIVERY</span>
+                    </article>
+
+                    <article class="service-card">
+                        <div class="service-icon">🔐</div>
+                        <h3>Origin Access Control</h3>
+                        <p>
+                            Restricts access to the S3 origin so that
+                            visitors use the intended CloudFront path.
+                        </p>
+                        <span class="service-tag">ACCESS CONTROL</span>
+                    </article>
+
+                </div>
+            </div>
+        </section>
+
+        <section id="deployment">
+            <div class="container">
+
+                <div class="section-heading">
+                    <p class="section-label">Deployment Workflow</p>
+                    <h2 class="section-title">From HTML to the internet.</h2>
+                    <p class="section-description">
+                        A simple overview of the deployment process
+                        for a static website.
+                    </p>
+                </div>
+
+                <div class="steps">
+
+                    <article class="step">
+                        <span class="step-number">STEP 01</span>
+                        <h3>Create</h3>
+                        <p>
+                            Build the HTML, CSS, and other static files
+                            required for the website.
+                        </p>
+                    </article>
+
+                    <article class="step">
+                        <span class="step-number">STEP 02</span>
+                        <h3>Store</h3>
+                        <p>
+                            Upload the files to an Amazon S3 bucket
+                            with public access blocked.
+                        </p>
+                    </article>
+
+                    <article class="step">
+                        <span class="step-number">STEP 03</span>
+                        <h3>Configure</h3>
+                        <p>
+                            Set up CloudFront, Origin Access Control,
+                            HTTPS, and the S3 bucket policy.
+                        </p>
+                    </article>
+
+                    <article class="step">
+                        <span class="step-number">STEP 04</span>
+                        <h3>Validate</h3>
+                        <p>
+                            Open the CloudFront domain and test
+                            that the website loads successfully.
+                        </p>
+                    </article>
+
+                </div>
+            </div>
+        </section>
+
+        <section id="security">
+            <div class="container">
+
+                <div class="section-heading">
+                    <p class="section-label">Security First</p>
+                    <h2 class="section-title">Designed with security in mind.</h2>
+                </div>
+
+                <div class="security-box">
+
+                    <div>
+                        <h3>Access control</h3>
+                        <p>
+                            Keep the S3 bucket private and use a
+                            CloudFront Origin Access Control
+                            configuration to authorize access to
+                            website objects.
+                        </p>
+
+                        <div class="note">
+                            Security depends on the actual bucket policy,
+                            distribution configuration, and account
+                            permissions. Verify each before deployment.
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3>Deployment checklist</h3>
+                        <ul>
+                            <li>Enable S3 Block Public Access.</li>
+                            <li>Use HTTPS for website visitors.</li>
+                            <li>Restrict S3 reads to the intended distribution.</li>
+                            <li>Apply least-privilege permissions.</li>
+                            <li>Check AWS costs and clean up unused resources.</li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer>
+        <div class="container footer-inner">
+            <p><strong>CloudLaunch</strong> · Cloud Computing Practice Project</p>
+            <p>Built to learn AWS infrastructure and deployment.</p>
+        </div>
+    </footer>
+
+</body>
+</html>
